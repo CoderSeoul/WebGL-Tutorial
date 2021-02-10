@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        'week-1': './src/5Tooling-and-refactor.js',
+        '8Multiple-textures': './src/8Multiple-textures.js',
     },
 
     output: {
