@@ -1,3 +1,5 @@
+//픽셀의 위치에 따라 색상을 다르게 주기위함
+
 const canvas = document.querySelector('canvas');
 const gl = canvas.getContext('webgl');
 //gl.~~~()는 버스를 통해 GPU에게 무언가를 시키는 것이다.'라고 해석
@@ -48,6 +50,7 @@ function compileShader(shader, source) {
 }
 
 compileShader(vertexShader, vShaderSource);
+// 각 픽셀마다 프래그먼트 쉐이더를 호출하여 당신이 픽셀을 무슨 색상으로 그리기 원하는지 물어 봅니다. 프래그먼트 쉐이더는 해당 픽셀에 대해 원하는 색상을 vec4로 출력합니다.
 compileShader(fragmentShader, fShaderSource);
 
 //셰이더 프로그램 그릇에 컴파일 된 두 셰이더를 담는다.
@@ -57,7 +60,8 @@ gl.attachShader(program, fragmentShader);
 gl.linkProgram(program); //컴파일 된 두 셰이더를 링크한다.링크할 때 버텍스 셰이더의 varying 변수와 프래그먼트 셰이더의 varying 변수가 연결된다.
 gl.useProgram(program); // gpu 한테 이 프로그램 사용한다고 말함
 
-// 접근할 수 있는 위치값(포인터)을 GPU한테 시켜서 받아온다.
+// 접근할 수 있는 위치값(포인터)을 GPU한테 시켜서 받아온다. 초기화과정에서 해야하는 일
+//Attributes는 버퍼에서 데이터를 가져오기 때문에 버퍼를 생성해야 합니다.
 const positionLocation = gl.getAttribLocation(program, 'position');
 const colorLocation = gl.getAttribLocation(program, 'color');
 const resolutionUniformLocation = gl.getUniformLocation(program, 'resolution');
@@ -109,11 +113,14 @@ const colorBuffer = gl.createBuffer(gl.ARRAY_BUFFER);
 
 //To make any changes to GPU buffer
 
+//바인드 시 WEBGL의 내부 전역변수로 설정되어 모든 함수들이 참조 => 버퍼에 데이터를 넣을 수 있게 됨
 gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, colorData, gl.STATIC_DRAW);
 
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer); //생성된 버퍼를 작업할 버퍼로 지정합니다
 gl.bufferData(gl.ARRAY_BUFFER, positionData, gl.STATIC_DRAW); // 지정된 버퍼에 데이터를 전달
+
+// 데이터가 버퍼에 들어간 후엔, WebGL에게 데이터를 가져오는 방법과 버텍스 쉐이더의 attribute로 제공하는 방법을 알려 주어야 합니다.
 
 const attributeSize = 2; //정점당 얼마나 많은 컴포넌트를 가져오는지 알려줍니다(항상 1~4이어야 함, 셰이더에서 vec1 ~ vec4이므로)
 const type = gl.FLOAT; //데이타의 타입은 무엇인지(BYTE, FLOAT, INT, UNSIGNED_SHORT등)를 알려줍니다
